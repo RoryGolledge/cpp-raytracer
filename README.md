@@ -1,4 +1,9 @@
-Setup cmake with
+# Setup
 
-`cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake`
-
+```
+$ git clone --recurse-submodules git@github.com:RoryGolledge/cpp-raytracer.git
+$ cd cpp-raytracer
+$ cmake -B build -S .
+$ cmake --build build
+$ ./build/raytrace
+```
