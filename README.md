@@ -1,7 +1,7 @@
 # Setup
 
 ```
-$ git clone --recurse-submodules git@github.com:RoryGolledge/cpp-raytracer.git
+$ git clone --recurse-submodules https://github.com/RoryGolledge/cpp-raytracer.git
 $ cd cpp-raytracer
 $ cmake -B build -S .
 $ cmake --build build
