@@ -1,5 +1,5 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef HITTABLE_GROUP_H
+#define HITTABLE_GROUP_H
 
 #include <objects/hittable.h>
 #include <ray.h>
@@ -33,6 +33,7 @@ namespace objects {
         ) const -> std::optional<hit_record> override {
             auto record = std::optional<hit_record>{};
             do_hit<sizeof...(Ts) - 1>(r, t_min, t_max, record);
+            std::cerr << record->t << std::endl;
 
             return record;
         }
@@ -49,10 +50,10 @@ namespace objects {
         ) const -> void {
             auto closest_so_far = t_max;
 
-            auto this_record = std::get<Index>(nodes).hit(r, t_min, t_max);
+            const auto this_record = std::get<Index>(nodes).hit(r, t_min, t_max);
 
             if (this_record.has_value()) {
-                rec = this_record;
+                *rec = std::move(*this_record);
                 closest_so_far = this_record->t;
             }
 
@@ -63,5 +64,5 @@ namespace objects {
     };
 }
 
-#endif // SCENE_H
+#endif // HITTABLE_GROUP_H
 

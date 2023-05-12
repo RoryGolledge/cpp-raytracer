@@ -1,4 +1,5 @@
 #include <array>
+#include <memory>
 #include <thread>
 #include <iostream>
 #include <limits>
@@ -12,33 +13,22 @@
 #include <objects/hittable_group.h>
 #include <objects/sphere.h>
 #include <ray.h>
-
-auto random_float() -> float {
-    static std::mt19937 generator;
-    static std::uniform_real_distribution<float> distribution(0.f, 1.f);
-    return distribution(generator);
-}
+#include <materials/lambertian.h>
 
 auto ray_colour(
     const ray::ray& r, const objects::hittable& world, uint16_t depth
 ) -> colour::colour {
     if (depth == 0) return {};
 
-    auto random_in_unit_sphere = []() -> glm::vec3 {
-        while (true) {
-            auto v = glm::vec3{
-                (random_float() - 0.5f) * 2.f, (random_float() - 0.5f) * 2.f, (random_float() - 0.5f) * 2.f
-            };
-            if (std::pow(glm::length(v), 2) < 1) return v;
-        }
-    };
-
     auto record = world.hit(r, 0.001f, std::numeric_limits<float>::infinity());
     if (record.has_value()) {
-        auto target = record->position + record->normal + glm::normalize(random_in_unit_sphere());
-        return .5f * ray_colour(
-            {record->position, target - record->position}, world, depth - 1
-        );
+        if (auto result = record->material->scatter(r, *record)) {
+            return result->attenuation * ray_colour(
+                result->scatter, world, depth - 1
+            );
+        }
+        
+        return {};
     }
 
     auto unit_direction = glm::normalize(r.direction);
@@ -48,9 +38,13 @@ auto ray_colour(
 
 int main(void) {
     // World
+    auto materials = std::vector<std::unique_ptr<material::material>>{};
+    materials.emplace_back(new material::lambertian{colour::colour{0.8, 0.8, 0.0}});
+    materials.emplace_back(new material::lambertian{colour::colour{0.7, 0.3, 0.3}});
+
     const auto world = objects::hittable_group<objects::sphere, objects::sphere>{
-        objects::sphere{{0, 0, -1}, .5f},
-        objects::sphere{{0, -100.5, -1}, 100},
+        objects::sphere{{0, 0, -1}, .5f, *materials[0]},
+        objects::sphere{{0, -100.5, -1}, 100, *materials[0]},
     };
 
     // Image
@@ -88,8 +82,8 @@ int main(void) {
 
                 for (auto col = size_t{0}; col < image_width; ++col) {
                     for (int _ = 0; _ < samples_per_pixel; ++_) {
-                        auto u = (static_cast<float>(col) + random_float()) / (image_width - 1);
-                        auto v = (static_cast<float>(row) + random_float()) / (image_height - 1);
+                        auto u = (static_cast<float>(col) + ray::random_float()) / (image_width - 1);
+                        auto v = (static_cast<float>(row) + ray::random_float()) / (image_height - 1);
                         auto r = cam.get_ray(u, v);
                         chunk_buffer[thread_id][col] += ray_colour(r, world, max_depth);
                     }

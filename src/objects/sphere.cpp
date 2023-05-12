@@ -26,6 +26,7 @@ auto objects::sphere::hit(
     auto record = hit_record{};
     record.t = root;
     record.position = r.at(record.t);
+    record.material = &mat;
     auto outward_normal = (record.position - centre) / radius;
 
     record.set_face_normal(r, outward_normal);

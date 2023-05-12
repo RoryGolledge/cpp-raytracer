@@ -4,6 +4,10 @@
 #include <glm/vec3.hpp>
 
 namespace ray {
+    // TODO: Move these somewhere that makes sense
+    auto random_float() -> float;
+    auto random_in_unit_sphere() -> glm::vec3;
+
     struct ray {
         ray(const glm::vec3& origin, const glm::vec3& direction):
             origin(origin), direction(direction) {}
@@ -16,5 +20,6 @@ namespace ray {
         glm::vec3 direction;
     };
 }
+
 #endif // RAY_H
 
