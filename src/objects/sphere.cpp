@@ -31,6 +31,6 @@ auto objects::sphere::hit(
 
     record.set_face_normal(r, outward_normal);
 
-    return { record };
+    return record;
 }
 

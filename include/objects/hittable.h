@@ -24,10 +24,7 @@ namespace objects {
 
         hit_record() = default;
 
-        hit_record(const hit_record& other):
-            position(other.position),
-            normal(other.normal),
-            material(other.material) {}
+        hit_record(const hit_record& other) = default;
 
         auto operator=(const hit_record& other) -> hit_record& {
             position = other.position;

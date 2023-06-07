@@ -14,6 +14,7 @@
 #include <objects/sphere.h>
 #include <ray.h>
 #include <materials/lambertian.h>
+#include <materials/metal.h>
 
 auto ray_colour(
     const ray::ray& r, const objects::hittable& world, uint16_t depth
@@ -41,24 +42,28 @@ int main(void) {
     auto materials = std::vector<std::unique_ptr<material::material>>{};
     materials.emplace_back(new material::lambertian{colour::colour{0.8, 0.8, 0.0}});
     materials.emplace_back(new material::lambertian{colour::colour{0.7, 0.3, 0.3}});
+    materials.emplace_back(new material::metal{colour::colour{0.8, 0.8, 0.8}, .3f});
+    materials.emplace_back(new material::metal{colour::colour{0.8, 0.6, 0.2}, .1f});
 
-    const auto world = objects::hittable_group<objects::sphere, objects::sphere>{
-        objects::sphere{{0, 0, -1}, .5f, *materials[0]},
+    const auto world = objects::hittable_group<objects::sphere, objects::sphere, objects::sphere, objects::sphere>{
         objects::sphere{{0, -100.5, -1}, 100, *materials[0]},
+        objects::sphere{{0, 0, -1}, .5f, *materials[1]},
+        objects::sphere{{-1, 0, -1}, .5f, *materials[2]},
+        objects::sphere{{1, 0, -1}, .5f, *materials[3]},
     };
 
     // Image
     const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 400;
+    const int image_width = 1200;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 100;
-    const int max_depth = 50;
+    const int samples_per_pixel = 150;
+    const int max_depth = 80;
 
     // Camera
     camera::camera cam;
     
     // Thread
-    const size_t standard_chunk_size = 16;
+    const size_t standard_chunk_size = 32;
     const size_t n_chunks = image_height / standard_chunk_size;
     auto chunk_buffer = std::array<std::array<colour::colour, image_width>, standard_chunk_size>{};
 

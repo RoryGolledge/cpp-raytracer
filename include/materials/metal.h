@@ -1,5 +1,5 @@
-#ifndef LAMBERTIAN_H
-#define LAMBERTIAN_H
+#ifndef METAL_H
+#define METAL_H
 
 #include <glm/geometric.hpp>
 
@@ -8,17 +8,19 @@
 #include <objects/hittable.h>
 
 namespace material {
-    class lambertian : public material {
+    class metal : public material {
     public:
-        lambertian(const colour::colour a) : albedo(a) {}
+        metal(const colour::colour a, const float fuzz):
+            albedo(a), fuzz(fuzz < 1 ? fuzz : 1) {}
 
         virtual auto scatter(
             const ray::ray& r_in, const objects::hit_record& rec
         ) const -> std::optional<scatter_out> override;
 
         colour::colour albedo;
+        float fuzz;
     };
 }
 
-#endif // LAMBERTIAN_H
+#endif // METAL_H
 
