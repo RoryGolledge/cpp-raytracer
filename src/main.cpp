@@ -1,4 +1,5 @@
 #include <array>
+#include <cmath>
 #include <memory>
 #include <thread>
 #include <iostream>
@@ -13,6 +14,7 @@
 #include <objects/hittable_group.h>
 #include <objects/sphere.h>
 #include <ray.h>
+#include <materials/dielectric.h>
 #include <materials/lambertian.h>
 #include <materials/metal.h>
 
@@ -40,27 +42,29 @@ auto ray_colour(
 int main(void) {
     // World
     auto materials = std::vector<std::unique_ptr<material::material>>{};
-    materials.emplace_back(new material::lambertian{colour::colour{0.8, 0.8, 0.0}});
-    materials.emplace_back(new material::lambertian{colour::colour{0.7, 0.3, 0.3}});
-    materials.emplace_back(new material::metal{colour::colour{0.8, 0.8, 0.8}, .3f});
-    materials.emplace_back(new material::metal{colour::colour{0.8, 0.6, 0.2}, .1f});
+    materials.emplace_back(new material::lambertian{colour::colour{0.8, 0.8, 0.}});
+    materials.emplace_back(new material::lambertian{colour::colour{.1, .2, .5}});
+    materials.emplace_back(new material::dielectric{1.5f});
+    materials.emplace_back(new material::metal{colour::colour{.8, .6, 0.2}, 0.});
 
-    const auto world = objects::hittable_group<objects::sphere, objects::sphere, objects::sphere, objects::sphere>{
-        objects::sphere{{0, -100.5, -1}, 100, *materials[0]},
-        objects::sphere{{0, 0, -1}, .5f, *materials[1]},
-        objects::sphere{{-1, 0, -1}, .5f, *materials[2]},
-        objects::sphere{{1, 0, -1}, .5f, *materials[3]},
+    const auto world = objects::hittable_group<objects::sphere, objects::sphere, objects::sphere, objects::sphere> {
+        objects::sphere{{0, -100.5, -1.}, 100., *materials[0]},
+        objects::sphere{{0, 0, -1.}, .5, *materials[1]},
+        objects::sphere{{-1., 0, -1.}, .5, *materials[2]},
+        objects::sphere{{1., 0, -1.}, -.5, *materials[3]},
     };
 
     // Image
-    const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 1200;
+    const auto aspect_ratio = 16.f / 9.f;
+    const int image_width = 2000;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 150;
-    const int max_depth = 80;
+    const int samples_per_pixel = 100;
+    const int max_depth = 50;
 
     // Camera
-    camera::camera cam;
+    auto cam = camera::camera{
+        glm::vec3{-2, 2, 1}, glm::vec3{0 ,0 ,-1}, glm::vec3{0, 1, 0}, 90.f, aspect_ratio
+    };
     
     // Thread
     const size_t standard_chunk_size = 32;

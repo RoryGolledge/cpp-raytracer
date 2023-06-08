@@ -4,14 +4,11 @@
 auto material::metal::scatter(
     const ray::ray& r_in, const objects::hit_record& rec
 ) const -> std::optional<scatter_out> {
-    glm::vec3 reflected = glm::reflect(glm::normalize(r_in.direction), rec.normal);
-    auto out = scatter_out{
-        albedo,
-        {rec.position, reflected + fuzz * ray::random_in_unit_sphere()}
-    };
+    auto reflected = glm::reflect(glm::normalize(r_in.direction), rec.normal);
+    auto direction = reflected + fuzz * ray::random_in_unit_sphere();
 
-    if (dot(out.scatter.direction, rec.normal) > 0) {
-        return out;
+    if (dot(direction, rec.normal) > 0) {
+        return {{albedo, {rec.position, direction}}};
     }
 
     return {};
